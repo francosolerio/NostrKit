@@ -2207,7 +2207,10 @@ extension WalletConnectManager {
     /// ```
     public func supportsMethod(_ method: NWCMethod) -> Bool {
         guard let capabilities = activeConnection?.capabilities else {
-            return false
+            // When capabilities are unknown (info event wasn't received), optimistically
+            // assume the wallet supports the method. The wallet will return an appropriate
+            // error if it doesn't, which is better than silently blocking all operations.
+            return true
         }
         return capabilities.methods.contains(method)
     }
