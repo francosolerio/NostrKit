@@ -5,8 +5,8 @@ import PackageDescription
 let package = Package(
     name: "NostrKit",
     platforms: [
-        .macOS(.v26),
-        .iOS(.v26),
+        .macOS(.v15),
+        .iOS(.v17),
         .tvOS(.v26),
         .watchOS(.v26),
         .macCatalyst(.v26)
