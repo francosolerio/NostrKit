@@ -1069,8 +1069,8 @@ public class WalletConnectManager {
         }
         
         if let tlvRecords = tlvRecords, !tlvRecords.isEmpty {
-            let tlvArray = tlvRecords.map { record in
-                ["type": AnyCodable(record.type), "value": AnyCodable(record.value)]
+            let tlvArray: [[String: Any]] = tlvRecords.map { record in
+                ["type": Int64(record.type), "value": record.value]
             }
             params["tlv_records"] = AnyCodable(tlvArray)
         }
@@ -1536,17 +1536,17 @@ public class WalletConnectManager {
         defer { isLoading = false }
         
         // Build invoices array
-        let invoicesParams: [[String: AnyCodable]] = invoices.map { inv in
-            var dict: [String: AnyCodable] = ["invoice": AnyCodable(inv.invoice)]
+        let invoicesParams: [[String: Any]] = invoices.map { inv in
+            var dict: [String: Any] = ["invoice": inv.invoice]
             if let id = inv.id {
-                dict["id"] = AnyCodable(id)
+                dict["id"] = id
             }
             if let amount = inv.amount {
-                dict["amount"] = AnyCodable(amount)
+                dict["amount"] = amount
             }
             return dict
         }
-        
+
         let params: [String: AnyCodable] = ["invoices": AnyCodable(invoicesParams)]
         
         let requestEvent = try NostrEvent.nwcRequest(
@@ -1624,26 +1624,26 @@ public class WalletConnectManager {
         defer { isLoading = false }
         
         // Build keysends array
-        let keysendsParams: [[String: AnyCodable]] = keysends.map { ks in
-            var dict: [String: AnyCodable] = [
-                "pubkey": AnyCodable(ks.pubkey),
-                "amount": AnyCodable(ks.amount)
+        let keysendsParams: [[String: Any]] = keysends.map { ks in
+            var dict: [String: Any] = [
+                "pubkey": ks.pubkey,
+                "amount": ks.amount
             ]
             if let id = ks.id {
-                dict["id"] = AnyCodable(id)
+                dict["id"] = id
             }
             if let preimage = ks.preimage {
-                dict["preimage"] = AnyCodable(preimage)
+                dict["preimage"] = preimage
             }
             if let tlvRecords = ks.tlvRecords, !tlvRecords.isEmpty {
-                let tlvArray = tlvRecords.map { record in
-                    ["type": AnyCodable(record.type), "value": AnyCodable(record.value)]
+                let tlvArray: [[String: Any]] = tlvRecords.map { record in
+                    ["type": Int64(record.type), "value": record.value]
                 }
-                dict["tlv_records"] = AnyCodable(tlvArray)
+                dict["tlv_records"] = tlvArray
             }
             return dict
         }
-        
+
         let params: [String: AnyCodable] = ["keysends": AnyCodable(keysendsParams)]
         
         let requestEvent = try NostrEvent.nwcRequest(
