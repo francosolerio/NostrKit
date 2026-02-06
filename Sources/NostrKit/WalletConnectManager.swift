@@ -1334,6 +1334,14 @@ public class WalletConnectManager {
         
         /// Supported notification types.
         public let notifications: [NWCNotificationType]
+
+        /// Wallet app/connection name from metadata (e.g. "My Alby Hub").
+        public let metadataName: String?
+
+        /// The best display name available: metadata name, then alias, then nil.
+        public var displayName: String? {
+            metadataName ?? alias
+        }
     }
     
     /// Retrieves information about the connected wallet/node.
@@ -1432,6 +1440,12 @@ public class WalletConnectManager {
             blockHeight = Int(height)
         }
         
+        // Parse metadata name
+        var metadataName: String?
+        if let metadata = result["metadata"]?.value as? [String: Any] {
+            metadataName = metadata["name"] as? String
+        }
+
         return WalletInfo(
             alias: result["alias"]?.value as? String,
             color: result["color"]?.value as? String,
@@ -1440,7 +1454,8 @@ public class WalletConnectManager {
             blockHeight: blockHeight,
             blockHash: result["block_hash"]?.value as? String,
             methods: methods,
-            notifications: notifications
+            notifications: notifications,
+            metadataName: metadataName
         )
     }
     
