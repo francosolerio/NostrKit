@@ -499,12 +499,10 @@ public actor RelayPool {
                         
                         // Set a timeout for OK response
                         Task {
-                            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 second timeout
+                            try? await Task.sleep(for: .seconds(5))
                             
                             // Check if continuation is still pending
-                            if let pending = pendingOKResponses[relay.url]?[event.id] {
-                                pendingOKResponses[relay.url]?.removeValue(forKey: event.id)
-                                
+                            if let pending = pendingOKResponses[relay.url]?.removeValue(forKey: event.id) {
                                 // Timeout occurred
                                 pending.resume(returning: PublishResult(
                                     relay: relay.url,
@@ -516,16 +514,16 @@ public actor RelayPool {
                         }
                         
                     } catch {
-                        // Remove pending continuation
-                        pendingOKResponses[relay.url]?.removeValue(forKey: event.id)
-                        
-                        // Resume with error
-                        continuation.resume(returning: PublishResult(
-                            relay: relay.url,
-                            success: false,
-                            message: nil,
-                            error: error
-                        ))
+                        // Only resume if the continuation is still pending (hasn't been
+                        // resumed by an OK response or timeout already). Fixes CASTAMATIC-1S0.
+                        if let pending = pendingOKResponses[relay.url]?.removeValue(forKey: event.id) {
+                            pending.resume(returning: PublishResult(
+                                relay: relay.url,
+                                success: false,
+                                message: nil,
+                                error: error
+                            ))
+                        }
                     }
                 }
         }
@@ -562,9 +560,7 @@ public actor RelayPool {
                     print("[RelayPool] Notice from \(url): \(notice)")
                 case .ok(let eventId, let accepted, let message):
                     // Check if we have a pending continuation for this event
-                    if let continuation = pendingOKResponses[url]?[eventId] {
-                        pendingOKResponses[url]?.removeValue(forKey: eventId)
-
+                    if let continuation = pendingOKResponses[url]?.removeValue(forKey: eventId) {
                         // Resume the continuation with the result
                         continuation.resume(returning: PublishResult(
                             relay: url,
