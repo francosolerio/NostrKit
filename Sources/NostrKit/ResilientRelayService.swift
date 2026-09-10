@@ -53,8 +53,9 @@ public actor ResilientRelayService: RelayServiceProtocol {
         self.messageContinuation = continuation
         
         // Setup heartbeat timeout handler
-        Task {
-            await heartbeatManager.setTimeoutHandler { [weak self] in
+        Task { [weak self] in
+            guard let self else { return }
+            await self.heartbeatManager.setTimeoutHandler { [weak self] in
                 await self?.handleHeartbeatTimeout()
             }
         }
